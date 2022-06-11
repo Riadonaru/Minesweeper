@@ -260,7 +260,7 @@ class Game():
             self.restart_pos = self.settings["width"] / 2
 
 
-    def flag(self, x: int, y: int):
+    def flag(self, x: int, y: int) -> bool:
         """This method Flags/Unflags the cell at the given coordinates.
 
         Args:
@@ -297,6 +297,8 @@ class Game():
                         if cell.content != -1:
                             cell.hidden = False
                 self.condition = 0
+
+        return self.grid.contents[y][x].flagged
 
 
     def reveal(self, x: int, y: int):

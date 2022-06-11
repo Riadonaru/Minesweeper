@@ -5,7 +5,7 @@
     "mines": 15,
     "play_sounds": false,
     "allow_command_input": true,
-    "input_source": "client",
+    "input_source": "server",
     "cell_size": 32,
     "top_border_size": 100,
     "lrb_border_size": 16

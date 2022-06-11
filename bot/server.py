@@ -4,7 +4,8 @@ from typing import Dict
 
 from classes import CLIENTS, Communicator, Client
 
-HOST = '10.100.102.24'
+# HOST = '10.100.102.24'
+HOST = '127.0.0.1'
 PORT = 65432
 RECVR: Client = None
 

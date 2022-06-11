@@ -4,11 +4,25 @@ from turtle import st
 
 import Minesweeper
 
-HOST = "10.100.102.24"  # The server's hostname or IP address
+# HOST = "10.100.102.24"  # The server's hostname or IP address
+HOST = '127.0.0.1'
 PORT = 65432  # The port used by the server
 
+SUCCESS = b'0'
+ERROR = b'-2'
+WIN = b'9'
+LOSE = b'10'
 
 def client(game: Minesweeper.Game):
+    """This method handles all of the input commands, and outputs an int as follows:
+        Reveal: -1 - 8 are valid values for cell contents, -2 for error 9 for win & 10 for lose.
+        Flag: Either 1 if cell is flagged, 2 if unflagged, -2 for error, 9 for win & 10 for lose.
+        Setting: 0 if set successfully, -2 if an error occured.
+        Reset: 0 if reset successfull, -2 if an error occured
+
+    Args:
+        game (Minesweeper.Game): The game which commands we handle
+    """
 
     global INPUT_SOURCE, SETTINGS_SPR
     
@@ -51,32 +65,50 @@ def client(game: Minesweeper.Game):
                         s.sendall(bytes('Successfully Connected to Client %s' % (myId), 'ascii'))
 
                 case "reveal":
-                    data = data[1].split()
-                    game.reveal(int(data[0]), int(data[1]))
+                    try:
+                        data = data[1].split()
+                        x = int(data[0])
+                        y = int(data[1])
+                        game.reveal(x, y)
+                        s.sendall(bytes(game.grid.contents[x][y].content, "ascii"))
+                    except:
+                        s.sendall(ERROR)
+
 
                 case "setting":
-                    data = data[1].split()
-                    match str(type(game.settings[data[0]])):
-                        
-                        case "<class 'bool'>":
-                            if data[1] == "True":
-                                game.settings[data[0]] = True
-                            elif data[1] == "False":
-                                game.settings[data[0]] = False
-                            else:
-                                s.sendall(bytes(data[1] + " is not a valid entry!", 'ascii'))
-                        
-                        case "<class 'int'>":
-                            game.settings[data[0]] = int(data[1])
+                    try:
+                        data = data[1].split()
+                        match str(type(game.settings[data[0]])):
+                            
+                            case "<class 'bool'>":
+                                if data[1] == "True":
+                                    game.settings[data[0]] = True
+                                elif data[1] == "False":
+                                    game.settings[data[0]] = False
+                                else:
+                                    s.sendall(bytes(data[1] + " is not a valid entry!", 'ascii'))
+                            
+                            case "<class 'int'>":
+                                game.settings[data[0]] = int(data[1])
 
-                        case "<class 'str'>":
-                            game.settings[data[0]] = str(data[1])
-                    
-                    game.setSettings()
+                            case "<class 'str'>":
+                                game.settings[data[0]] = str(data[1])
+                        
+                        game.setSettings()
+                        s.sendall(SUCCESS)
+
+                    except:
+                        s.sendall(ERROR)
 
                 case "flag":
-                    data = data[1].split()
-                    game.flag(int(data[0]), int(data[1]))
+                    try:
+                        data = data[1].split()
+                        if game.flag(int(data[0]), int(data[1])):
+                            s.sendall(b'1')
+                        else:
+                            s.sendall(b'2')
+                    except:
+                        s.sendall(ERROR)
 
                 case "reset":
                     game.restart()
